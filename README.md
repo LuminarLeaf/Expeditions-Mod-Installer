@@ -14,7 +14,7 @@ Tested on game builds from Steam. Epic Games Store is not tested, you may create
 4. Click on accept API terms (idr if this is necessary for getting o-auth token but eh do it anyways).
 5. Below that there will be a OAuth2 section, give a name for a client(can be anything) and click on Create Client.
 6. Then in the token field, write a new name and generate a token.
-7. Rename the .env_example file to .env.
+7. Rename the `.env_example` file to `.env`.
 8. Copy the token and paste it the .env file in the `ACCESS_TOKEN` field. Remember that the token is only shown once so I recommend you to save it in a separate file too.
 9. Open the `.env` file and change the `MODS_DIR` and `USER_PROFILE` fields to the correct paths.
    - MODS_DIR: `C:\Users\USER_NAME\Documents\My Games\Expeditions\base\Mods\.modio\mods`
