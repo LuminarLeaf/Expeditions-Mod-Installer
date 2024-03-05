@@ -1,5 +1,3 @@
-#Requires -Version >= 7
-
 $updateMods = 0
 $debug = 0
 $clearCache = 0
