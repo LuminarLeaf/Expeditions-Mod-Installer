@@ -1,3 +1,5 @@
+#Requires -Version >= 7
+
 $updateMods = 0
 $debug = 0
 $clearCache = 0
@@ -187,8 +189,10 @@ foreach ($mod in $data.data) {
     Write-Host "--> OK"
 }
 
+# get previously installed mods
 $modsInstalled = $UserProfileJson.userprofile.modDependencies.SslValue.dependencies
 
+# check if mods are no longer subscribed
 $modsInstalled | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     # if mod is no longer subscribed, move to cache
     if ($subscribedMods.id -notcontains $_) {
@@ -198,34 +202,54 @@ $modsInstalled | Get-Member -MemberType NoteProperty | Select-Object -ExpandProp
     }
 }
 
+# update installed mods
 $modsInstalled = @{}
 foreach ($mod in $subscribedMods) {
     $modsInstalled["$($mod.id)"] = @()
 }
-Write-Debug $modsInstalled
 $UserProfileJson.userprofile.modDependencies.SslValue.dependencies = $modsInstalled
+Write-Debug "Mods Installed: $(ConvertTo-Json $modsInstalled)"
 
-$UserProfileJson.UserProfile | Get-Member -MemberType Properties | Select-Object -ExpandProperty Name | Where-Object { $_ -like "modStateList" } | ForEach-Object {
-    $modsEnabled = $UserProfileJson.UserProfile.$_
-    $enabledMods = @()
-    foreach ($mod in $modsEnabled) {
-        if ($mod.modId -in $subscribedMods.id) {
-            $enabledMods += @{
-                modId    = $mod.modId
-                modState = $mod.modState
-            }
+# check if user profile has modStateList, if not create it
+if ($null -eq $UserProfileJson.UserProfile.modStateList) {
+    $UserProfileJson.UserProfile | Add-Member -MemberType NoteProperty -Name modStateList -Value @()
+    Write-Debug "modStateList created"
+}
+
+# get current enabled mods
+$currentStateList = $UserProfileJson.UserProfile.modStateList
+$newStateList = @()
+
+# get keys of $modsInstalled
+$modIDs = @()
+foreach ($key in $modsInstalled.Keys) {
+    $modIDs += $key
+}
+
+Write-Debug "ModIDs: $(ConvertTo-Json $modIDs -Depth 100)"
+
+foreach ($mod in $modIDs) {
+    Write-Debug "Checking mod $mod..."
+    if ($currentStateList.modId -contains $mod) {
+        $newStateList += @{
+            modId    = $mod
+            modState = $currentStateList | Where-Object { $_.modId -eq $mod } | Select-Object -ExpandProperty modState
         }
     }
-    Write-Debug "mod States:"
-    Write-Debug (ConvertTo-Json $enabledMods -Depth 100)
-    $UserProfileJson.UserProfile.$_ = $enabledMods
+    else {
+        $newStateList += @{
+            modId    = $mod
+            modState = $false
+        }
+    }
 }
+
+Write-Debug "Mod States:"
+Write-Debug (ConvertTo-Json $newStateList -Depth 100)
+$UserProfileJson.UserProfile.modStateList = $newStateList
 
 Write-Host "Updating user profile..."
 Set-Content -Path $env:USER_PROFILE -Value ($UserProfileJson | ConvertTo-Json -Depth 100)
 Write-Host "Done"
 
-Write-Host "Press any key to continue..."
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-
-exit 0
+Pause
