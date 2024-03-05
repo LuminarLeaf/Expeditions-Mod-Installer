@@ -232,14 +232,8 @@ foreach ($mod in $modIDs) {
     Write-Debug "Checking mod $mod..."
     if ($currentStateList.modId -contains $mod) {
         $newStateList += @{
-            modId    = $mod
-            modState = $currentStateList | Where-Object { $_.modId -eq $mod } | Select-Object -ExpandProperty modState
-        }
-    }
-    else {
-        $newStateList += @{
-            modId    = $mod
-            modState = $false
+            modId    = [int]$mod
+            modState = $true
         }
     }
 }
