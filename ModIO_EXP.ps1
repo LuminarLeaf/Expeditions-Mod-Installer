@@ -11,11 +11,11 @@ $clearCache = 0
 # load environment variables
 Get-Content .env | ForEach-Object {
     $name, $value = $_.split('=')
-    $name = $name.Trim()
-    $value = $value.Trim()
     if ([string]::IsNullOrWhiteSpace($name) -or $name.Contains('#')) {
         continue
     }
+    $name = $name.Trim()
+    $value = $value.Trim()
     Set-Content env:\$name $value
 }
 
