@@ -202,6 +202,7 @@ $modsInstalled = @{}
 foreach ($mod in $subscribedMods) {
     $modsInstalled["$($mod.id)"] = @()
 }
+Write-Debug $modsInstalled
 $UserProfileJson.userprofile.modDependencies.SslValue.dependencies = $modsInstalled
 
 $UserProfileJson.UserProfile | Get-Member -MemberType Properties | Select-Object -ExpandProperty Name | Where-Object { $_ -like "modStateList" } | ForEach-Object {
