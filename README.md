@@ -18,7 +18,7 @@ Tested on game builds from Steam. Epic Games Store is not tested, you may create
 8. Copy the token and paste it the .env file in the `ACCESS_TOKEN` field. Remember that the token is only shown once so I recommend you to save it in a separate file too.
 9. Open the `.env` file and change the `MODS_DIR` and `USER_PROFILE` fields to the correct paths.
    - MODS_DIR: `C:\Users\USER_NAME\Documents\My Games\Expeditions\base\Mods\.modio\mods`
-   - USER_PROFILE: `C:\Program Files (x86)\Steam\userdata\USER_ID\1623730\remote\user_profile.cfg`
+   - USER_PROFILE: `C:\Program Files (x86)\Steam\userdata\USER_ID\2477340\remote\user_profile.cfg`
 10. Replace the `user_profile.cfg` file with the one in the repository.
 11. Before you run the script for the first time, you need to clear out the mods you may have installed from other sources/methods (if you have any). To do this, go to the `MODS_DIR` path and delete all the folders and files in the `mods` folder. If there are any mods in the mods folder with the same id as the mods you are going to download, the installer will not download them thinking that they are already there and this may not work correctly.
 12. Subscribe to the mods you want to download on the mod.io website.
