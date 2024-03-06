@@ -152,7 +152,7 @@ foreach ($mod in $data.data) {
     }
     if ($updateRequired -eq 1) {
         Write-Host "Updating mod $modID ($modName)..."
-        Remove-Item -LiteralPath $modDir -Recurse
+        Remove-Item -Path $modDir -Recurse
     }
     else {
         Write-Host "Installing mod $modID ($modName)..."
@@ -170,20 +170,37 @@ foreach ($mod in $data.data) {
     }
     Write-Host "--> Downloading thumbs --> OK"
 
-    Set-Content -Path "$modDir\modio.json" -Value ($mod | ConvertTo-Json -Depth 100)
+    Set-Content -Path "$modDir\modio.json" -Value ($mod | ConvertTo-Json -Depth 100 -Compress)
     Write-Host "--> Creating modio.json --> OK"
 
     $modUrl = $mod.modfile.download.binary_url
     $modFileName = $mod.modfile.filename
     $modFullPath = "$modDir\$modFileName"
-    Write-Host "--> Downloading mod"
-    Invoke-WebRequest -Uri $modUrl -Method Get -Headers $headers -OutFile $modFullPath
-    Write-Host "--> OK"
+    try {
+        Write-Host "--> Downloading mod"
+        Invoke-WebRequest -Uri $modUrl -Method Get -Headers $headers -OutFile $modFullPath
+        Write-Host "--> OK"
+    } catch {
+        Write-Host "Failed to download mod. Halting script execution."
+        Write-Host "Error: $_"
+        exit 1
+    }
 
     Write-Host "--> Extracting mod $modID ($modName)..."
-    Expand-Archive -Path $modFullPath -DestinationPath $modDir
-    Remove-Item -Path $modFullPath
-    Write-Host "--> OK"
+    $extracted = $false
+    try {
+        Expand-Archive -Path $modFullPath -DestinationPath $modDir
+        $extracted = $true
+    } catch {
+        Write-Host "Failed to extract mod $modID ($modName). Halting script execution."
+        Write-Host "Error: $_"
+        exit 1
+    }
+
+    if ($extracted) {
+        Remove-Item -Path $modFullPath
+        Write-Host "--> OK"
+    }
 }
 
 # get previously installed mods
@@ -192,20 +209,21 @@ $modsInstalled = $UserProfileJson.userprofile.modDependencies.SslValue.dependenc
 # check if mods are no longer subscribed
 $modsInstalled | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     # if mod is no longer subscribed, move to cache
+    Write-Debug "Checking mod $_..."
     if ($subscribedMods.id -notcontains $_) {
         Write-Host "Mod with ID $_ is no longer subscribed, moving to cache..."
-        Move-Item -Path "$env:MODS_DIR\$_" -Destination "$env:CACHE_DIR"
+        Move-Item -Path "$env:MODS_DIR\$_" -Destination "$env:CACHE_DIR\$_"
         Write-Host "Done"
     }
 }
 
-# update installed mods
+# update installed mods list
 $modsInstalled = @{}
 foreach ($mod in $subscribedMods) {
-    $modsInstalled["$($mod.id)"] = @()
+    $modsInstalled.Add("$($mod.id)", @())
 }
 $UserProfileJson.userprofile.modDependencies.SslValue.dependencies = $modsInstalled
-Write-Debug "Mods Installed: $(ConvertTo-Json $modsInstalled)"
+Write-Debug "Mods Installed: $(ConvertTo-Json $modsInstalled -Compress)"
 
 # check if user profile has modStateList, if not create it
 if ($null -eq $UserProfileJson.UserProfile.modStateList) {
@@ -223,11 +241,12 @@ foreach ($key in $modsInstalled.Keys) {
     $modIDs += $key
 }
 
-Write-Debug "ModIDs: $(ConvertTo-Json $modIDs -Depth 100)"
+Write-Debug "ModIDs: $(ConvertTo-Json $modIDs -Depth 100 -Compress)"
 
 foreach ($mod in $modIDs) {
     Write-Debug "Checking mod $mod..."
     if ($currentStateList.modId -contains $mod) {
+        Write-Debug "Mod $mod is enabled"
         $newStateList += @{
             modId    = [int]$mod
             modState = $true
@@ -235,12 +254,12 @@ foreach ($mod in $modIDs) {
     }
 }
 
-Write-Debug "Mod States:"
-Write-Debug (ConvertTo-Json $newStateList -Depth 100)
+Write-Debug "Mod States: $(ConvertTo-Json $newStateList -Depth 100 -Compress)"
 $UserProfileJson.UserProfile.modStateList = $newStateList
 
 Write-Host "Updating user profile..."
-Set-Content -Path $env:USER_PROFILE -Value ($UserProfileJson | ConvertTo-Json -Depth 100)
+Set-Content -Path $env:USER_PROFILE -Value ($UserProfileJson | ConvertTo-Json -Depth 100 -Compress)
+if ($DebugPreference -eq "Continue") { $UserProfileJson | ConvertTo-Json -Depth 100 -Compress | Out-File -FilePath "./userprofile.json" }
 Write-Host "Done"
 
 Pause
