@@ -72,19 +72,19 @@ Set-Content env:CACHE_DIR "$env:MODS_DIR\..\cache"
 Write-Debug "Cache dir : $env:CACHE_DIR"
 if (-not (Test-Path $env:CACHE_DIR)) {
     Write-Debug "Cache dir does not exist, creating..."
-    New-Item -Path $env:CACHE_DIR -ItemType Directory
+    New-Item -Path "$env:CACHE_DIR" -ItemType Directory
     Write-Debug "Done"
 }
 
 if ($clearCache -eq 1) {
     Write-Output "Clearing cache..."
-    Remove-Item -LiteralPath $env:CACHE_DIR\* -Recurse -Confirm
+    Remove-Item -LiteralPath "$env:CACHE_DIR\*" -Recurse -Confirm
     Write-Output "Done"
     exit 0
 }
 
 # load userprofile as json
-$UserProfileJson = Get-Content -Path $env:USER_PROFILE
+$UserProfileJson = Get-Content -Path "$env:USER_PROFILE"
 while ($UserProfileJson[-1] -ne "}") {
     $UserProfileJson = $UserProfileJson.Substring(0, $UserProfileJson.Length - 1)
 }
@@ -129,7 +129,7 @@ foreach ($mod in $data.data) {
         id = $modID
     }
     # if (Test-Path "$CacheDir\$modID") {
-    if ((Test-Path "$env:CACHE_DIR\$modID") -and -not (Test-Path $modDir)) {
+    if ((Test-Path "$env:CACHE_DIR\$modID") -and -not (Test-Path "$modDir")) {
         Write-Output "Mod with ID $modID found in cache, moving from cache to mods dir..."
         Move-Item -Path "$env:CACHE_DIR\$modID" -Destination "$env:MODS_DIR"
         Write-Output "Done"
@@ -152,14 +152,14 @@ foreach ($mod in $data.data) {
     }
     if ($updateRequired -eq 1) {
         Write-Output "Updating mod $modID ($modName)..."]
-        Remove-Item -Path $modDir -Recurse
+        Remove-Item -Path "$modDir" -Recurse
     }
     else {
         Write-Output "Installing mod $modID ($modName)..."
     }
 
-    if (-not (Test-Path $modDir)) {
-        New-Item -Path $modDir -ItemType Directory | Out-Null
+    if (-not (Test-Path "$modDir")) {
+        New-Item -Path "$modDir" -ItemType Directory | Out-Null
     }
 
     $resolutions = @('320x180', '640x360')
