@@ -90,12 +90,13 @@ if (-not (Test-Path $env:CACHE_DIR)) {
 if ($clearCache -eq 1) {
     Write-Output "Clearing cache..."
     # get user confirmation
-    $confirmation = Read-Host "Are you sure you want delete the directory $env:CACHE_DIR? (y/n)"
+    $confirmation = Read-Host "Are you sure you want delete the directory $($env:CACHE_DIR)? (y/n)"
     if ($confirmation -ne "y" -and $confirmation -ne "Y" -and $confirmation -ne "yes" -and $confirmation -ne "Yes") {
         Write-Output "Aborted"
         exit 0
     }
-    Get-ChildItem -Path "$env:CACHE_DIR" | Remove-Item -Recurse
+    if ($DebugPreference -eq "Continue") { Get-ChildItem -Path "$env:CACHE_DIR" | Remove-Item -Recurse -WhatIf }
+    else { Get-ChildItem -Path "$env:CACHE_DIR" | Remove-Item -Recurse }
     Write-Output "Done"
     exit 0
 }
