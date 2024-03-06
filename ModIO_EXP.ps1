@@ -98,42 +98,42 @@ if ($null -eq $UserProfileJson.UserProfile) {
 }
 
 # add stuff if not there
-if ($null -eq $UserProfileJson.UserProfile.modDependencies) {
-    Add-Member -InputObject $UserProfileJson.UserProfile -MemberType NoteProperty -Name modDependencies -Value @{
-        SslType  = "ModDependencies"
-        SslValue = @{
-            dependencies = @{}
-        }
-    }
-    Write-Debug "modDependencies added"
-    Write-Debug ($UserProfileJson.UserProfile.modDependencies | ConvertTo-Json -Depth 100)
-}
+# if ($null -eq $UserProfileJson.UserProfile.modDependencies) {
+#     Add-Member -InputObject $UserProfileJson.UserProfile -MemberType NoteProperty -Name modDependencies -Value @{
+#         SslType  = "ModDependencies"
+#         SslValue = @{
+#             dependencies = @{}
+#         }
+#     }
+#     Write-Debug "modDependencies added"
+#     Write-Debug ($UserProfileJson.UserProfile.modDependencies | ConvertTo-Json -Depth 100 -Compress)
+# }
 if ($null -eq $UserProfileJson.UserProfile.modStateList) {
     $UserProfileJson.UserProfile | Add-Member -MemberType NoteProperty -Name modStateList -Value @()
     Write-Debug "modStateList created"
 }
-if ($UserProfileJson.UserProfile.areModsPermitted -ne 1) {
-    $UserProfileJson.UserProfile.areModsPermitted = 1
-    Write-Debug "areModsPermitted set to 1"
-}
-if ($null -eq $UserProfileJson.UserProfile.modFilter) {
-    Add-Member -InputObject $UserProfileJson.UserProfile -MemberType NoteProperty -Name modFilter -Value @{
-        user0 = @{
-            SslType = "ModBrowserConfigData"
-            SslValue = @{
-                isConsoleApprovedMode = $false
-                isConsoleForbiddenMode = $false
-                isEnabledMode = $false
-                isSubscriptionsMode = $true
-                sortField = "name"
-                sortIsAsc = $true
-                tags = @()
-            }
-        }
-    }
-    Write-Debug "modFilter added"
-    Write-Debug ($UserProfileJson.UserProfile.modFilter | ConvertTo-Json -Depth 100)
-}
+# if ($UserProfileJson.UserProfile.areModsPermitted -ne 1) {
+#     $UserProfileJson.UserProfile.areModsPermitted = 1
+#     Write-Debug "areModsPermitted set to 1"
+# }
+# if ($null -eq $UserProfileJson.UserProfile.modFilter) {
+#     Add-Member -InputObject $UserProfileJson.UserProfile -MemberType NoteProperty -Name modFilter -Value @{
+#         user0 = @{
+#             SslType = "ModBrowserConfigData"
+#             SslValue = @{
+#                 isConsoleApprovedMode = $false
+#                 isConsoleForbiddenMode = $false
+#                 isEnabledMode = $false
+#                 isSubscriptionsMode = $true
+#                 sortField = "name"
+#                 sortIsAsc = $true
+#                 tags = @()
+#             }
+#         }
+#     }
+#     Write-Debug "modFilter added"
+#     Write-Debug ($UserProfileJson.UserProfile.modFilter | ConvertTo-Json -Depth 100 -Compress)
+# }
 
 # get subscribed mods
 Write-Host "Getting subscribed mods..."
@@ -167,9 +167,9 @@ foreach ($mod in $data.data) {
     $subscribedMods += @{
         id = $modID
     }
-    if (Test-Path "$env:CACHE_DIR\$modID") {
+    if ((Test-Path "$env:CACHE_DIR\$modID") -and -not (Test-Path $modDir)) {
         Write-Host "Mod with ID $modID found in cache, moving from cache to mods dir..."
-        Move-Item -Path "$env:CACHE_DIR\$modID" -Destination $modDir
+        Move-Item -Path "$env:CACHE_DIR\$modID" -Destination $env:MODS_DIR
         Write-Host "Done"
         continue
     }
@@ -190,7 +190,7 @@ foreach ($mod in $data.data) {
     }
     if ($updateRequired -eq 1) {
         Write-Host "Updating mod $modID ($modName)..."
-        Remove-Item -Path $modDir -Recurse
+        Remove-Item -LiteralPath $modDir -Recurse
     }
     else {
         Write-Host "Installing mod $modID ($modName)..."
@@ -260,7 +260,7 @@ $modsInstalled | Get-Member -MemberType NoteProperty | Select-Object -ExpandProp
 # update installed mods list
 $modsInstalled = @{}
 foreach ($mod in $subscribedMods) {
-    $modsInstalled.Add("$($mod.id)", @())
+    $modsInstalled["$($mod.id)"] = @()
 }
 $UserProfileJson.userprofile.modDependencies.SslValue.dependencies = $modsInstalled
 Write-Debug "Mods Installed: $(ConvertTo-Json $modsInstalled -Compress)"
@@ -288,8 +288,15 @@ foreach ($mod in $modIDs) {
     }
 }
 
-Write-Debug "Mod States: $(ConvertTo-Json $newStateList -Compress)"
-$UserProfileJson.UserProfile.modStateList = $newStateList
+# if new state list is empty, remove the modStateList property
+# if ($newStateList.Count -eq 0) {
+#     $UserProfileJson.UserProfile.PSObject.Properties.Remove("modStateList")
+#     Write-Debug "modStateList removed"
+# }
+# else {
+    Write-Debug "Mod States: $(ConvertTo-Json $newStateList -Compress)"
+    $UserProfileJson.UserProfile.modStateList = $newStateList
+# }
 
 Write-Host "Updating user profile..."
 Set-Content -Path $env:USER_PROFILE -Value ($UserProfileJson | ConvertTo-Json -Depth 100 -Compress)
