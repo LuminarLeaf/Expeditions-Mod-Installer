@@ -260,8 +260,8 @@ $UserProfileJson.UserProfile | Get-Member -MemberType Properties | Select-Object
 }
 
 Write-Output "Updating userprofile..."
-# Set-Content -Path "$UserProfile" -Value ($UserProfileJson | ConvertTo-Json -Depth 100)
 Set-Content -Path "$env:USER_PROFILE" -Value ($UserProfileJson | ConvertTo-Json -Depth 100 -Compress)
+if ($DebugPreference -eq "Continue") { $UserProfileJson | ConvertTo-Json -Depth 100 | Out-File -FilePath "./userprofile.json" }
 Write-Output "Done"
 
 Pause

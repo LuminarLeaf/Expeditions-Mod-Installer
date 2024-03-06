@@ -20,7 +20,6 @@ Tested on game builds from Steam. Epic Games Store is not tested, you may create
    - ACCESS_TOKEN: `eyJlbmMiOi...nUmmMUFX2A` (THIS IS YOUR OWN OAuth TOKEN FROM MODIO, PLEASE INCLUDE ENTIRE KEY)
    - USER_PROFILE: `C:\Program Files (x86)\Steam\userdata\USER_ID\2477340\remote\user_profile.cfg`
    - MODS_DIR: `C:\Users\USER_NAME\Documents\My Games\Expeditions\base\Mods\.modio\mods`
-     
 10. Replace the `user_profile.cfg` file with the one in the repository.
 11. Before you run the script for the first time, you need to clear out the mods you may have installed from other sources/methods (if you have any). To do this, go to the `MODS_DIR` path and delete all the folders and files in the `mods` folder. If there are any mods in the mods folder with the same id as the mods you are going to download, the installer will not download them thinking that they are already there and this may not work correctly.
 12. Subscribe to the mods you want to download on the mod.io website.
@@ -38,9 +37,11 @@ The installer will not remove the mods from the cache folder, so if you need to 
 - `--update` or `-u` - Update the mods. This will download new versions of the mods you have already downloaded if they are available (without this argument, only a message about the availability of new versions will be displayed).
 - `--version` or `-v` - Show the version of the script.
 
-## Issues
+## Known Issues
 
-If you have any issues, please create an issue on the GitHub repository.
+- For some reason, the when you enable a mod and then unsubscribe from it. After resubscribing to the mod the game resets the `user_profile.cfg` file and all the mods are disabled. To make sure this does not happen, disable the mods before unsubscribing from them.
+
+If you have any issues, please create an issue on the repository.
 
 ## Other notes
 
