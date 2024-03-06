@@ -7,6 +7,7 @@ $clearCache = 0
 # -u or --update      : update mods
 # -d or --debug       : show debug output
 # -v or --version     : show version
+# -h or --help        : show help
 
 # load env vars
 Get-Content .env | ForEach-Object {
@@ -31,6 +32,16 @@ if ($args.Length -gt 0) {
         }
         elseif ($arg -eq "-v" -or $arg -eq "--version") {
             Write-Output "ModIO_EXP.ps1 v1.1"
+            exit 0
+        }
+        elseif ($arg -eq "-h" -or $arg -eq "--help") {
+            Write-Output "Usage: ModIO_EXP.ps1 [options]"
+            Write-Output "Options:"
+            Write-Output "  -c, --clear-cache : clear cache"
+            Write-Output "  -u, --update      : update mods"
+            Write-Output "  -d, --debug       : show debug output"
+            Write-Output "  -v, --version     : show version"
+            Write-Output "  -h, --help        : show help"
             exit 0
         }
         else {
