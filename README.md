@@ -44,6 +44,22 @@ If you have any issues, please create an issue on the GitHub repository.
 
 This script is based on my other script for the game "Snowrunner", which can be found [here](https://github.com/AryanVerma1024/SnowRunner_mod_installer).
 
+If powerShell does not allow you to run the script, you may need to change the execution policy. To do this, run the following command in PowerShell as an administrator:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
+```
+
+After you have finished using the script, you can change the execution policy back to its original state:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope LocalMachine
+```
+
+If it still does not work, try PowerShell 7.
+
+This script was made primarily for personal use, so it may not work correctly in all cases. (Yes this is a heavy case of "it works on my machine")
+
 ## Credits
 
 - [Equdevel/Snowrunner_mod_installer](https://github.com/equdevel/SnowRunner_mod_installer) - The original script for Snowrunner written in python.
