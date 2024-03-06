@@ -97,6 +97,44 @@ if ($null -eq $UserProfileJson.UserProfile) {
     exit 1
 }
 
+# add stuff if not there
+if ($null -eq $UserProfileJson.UserProfile.modDependencies) {
+    Add-Member -InputObject $UserProfileJson.UserProfile -MemberType NoteProperty -Name modDependencies -Value @{
+        SslType  = "ModDependencies"
+        SslValue = @{
+            dependencies = @{}
+        }
+    }
+    Write-Debug "modDependencies added"
+    Write-Debug ($UserProfileJson.UserProfile.modDependencies | ConvertTo-Json -Depth 100)
+}
+if ($null -eq $UserProfileJson.UserProfile.modStateList) {
+    $UserProfileJson.UserProfile | Add-Member -MemberType NoteProperty -Name modStateList -Value @()
+    Write-Debug "modStateList created"
+}
+if ($UserProfileJson.UserProfile.areModsPermitted -ne 1) {
+    $UserProfileJson.UserProfile.areModsPermitted = 1
+    Write-Debug "areModsPermitted set to 1"
+}
+if ($null -eq $UserProfileJson.UserProfile.modFilter) {
+    Add-Member -InputObject $UserProfileJson.UserProfile -MemberType NoteProperty -Name modFilter -Value @{
+        user0 = @{
+            SslType = "ModBrowserConfigData"
+            SslValue = @{
+                isConsoleApprovedMode = $false
+                isConsoleForbiddenMode = $false
+                isEnabledMode = $false
+                isSubscriptionsMode = $true
+                sortField = "name"
+                sortIsAsc = $true
+                tags = @()
+            }
+        }
+    }
+    Write-Debug "modFilter added"
+    Write-Debug ($UserProfileJson.UserProfile.modFilter | ConvertTo-Json -Depth 100)
+}
+
 # get subscribed mods
 Write-Host "Getting subscribed mods..."
 
@@ -180,7 +218,8 @@ foreach ($mod in $data.data) {
         Write-Host "--> Downloading mod"
         Invoke-WebRequest -Uri $modUrl -Method Get -Headers $headers -OutFile $modFullPath
         Write-Host "--> OK"
-    } catch {
+    }
+    catch {
         Write-Host "Failed to download mod. Halting script execution."
         Write-Host "Error: $_"
         exit 1
@@ -191,7 +230,8 @@ foreach ($mod in $data.data) {
     try {
         Expand-Archive -Path $modFullPath -DestinationPath $modDir
         $extracted = $true
-    } catch {
+    }
+    catch {
         Write-Host "Failed to extract mod $modID ($modName). Halting script execution."
         Write-Host "Error: $_"
         exit 1
@@ -225,12 +265,6 @@ foreach ($mod in $subscribedMods) {
 $UserProfileJson.userprofile.modDependencies.SslValue.dependencies = $modsInstalled
 Write-Debug "Mods Installed: $(ConvertTo-Json $modsInstalled -Compress)"
 
-# check if user profile has modStateList, if not create it
-if ($null -eq $UserProfileJson.UserProfile.modStateList) {
-    $UserProfileJson.UserProfile | Add-Member -MemberType NoteProperty -Name modStateList -Value @()
-    Write-Debug "modStateList created"
-}
-
 # get current enabled mods
 $currentStateList = $UserProfileJson.UserProfile.modStateList
 $newStateList = @()
@@ -241,7 +275,7 @@ foreach ($key in $modsInstalled.Keys) {
     $modIDs += $key
 }
 
-Write-Debug "ModIDs: $(ConvertTo-Json $modIDs -Depth 100 -Compress)"
+Write-Debug "ModIDs: $(ConvertTo-Json $modIDs -Compress)"
 
 foreach ($mod in $modIDs) {
     Write-Debug "Checking mod $mod..."
@@ -254,7 +288,7 @@ foreach ($mod in $modIDs) {
     }
 }
 
-Write-Debug "Mod States: $(ConvertTo-Json $newStateList -Depth 100 -Compress)"
+Write-Debug "Mod States: $(ConvertTo-Json $newStateList -Compress)"
 $UserProfileJson.UserProfile.modStateList = $newStateList
 
 Write-Host "Updating user profile..."
