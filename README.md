@@ -61,6 +61,31 @@ Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope LocalMachine
 
 If it still does not work, try PowerShell 7.
 
+Powershell function to run the script:
+
+```powershell
+function ModIO_EXP {
+   $scriptPath = "enter the path to the folder where the script is located"
+   $currentPath = Get-Location
+   Set-Location $scriptPath
+   .\ModIO_EXP.ps1
+   Set-Location $currentPath
+   return
+}
+```
+
+You can add this function to your PowerShell profile to run the script from any location.
+
+To do this, run the following command in PowerShell:
+
+```powershell
+notepad $PROFILE
+```
+
+Then add the function to the file and save it.
+
+If it says that the file does not exist, then it will either prompt you to create a the file or you will have to create it manually.
+
 This script was made primarily for personal use, so it may not work correctly in all cases. (Yes this is a heavy case of "it works on my machine")
 
 ## Credits
