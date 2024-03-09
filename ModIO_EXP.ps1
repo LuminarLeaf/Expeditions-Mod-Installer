@@ -169,7 +169,7 @@ foreach ($mod in $data.data) {
         }
     }
     if ($updateRequired -eq 1) {
-        Write-Output "Updating mod $modID ($modName)..."]
+        Write-Output "Updating mod $modID ($modName)..."
         Remove-Item -Path "$modDir" -Recurse
     }
     else {
