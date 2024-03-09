@@ -10,7 +10,8 @@ $clearCache = 0
 # -h or --help        : show help
 
 # load env vars
-Get-Content ".\.env" | ForEach-Object {
+# Get-Content .\.env | ForEach-Object {
+Get-Content "$PSScriptRoot\.env" | ForEach-Object {
     if ([string]::IsNullOrWhiteSpace($_) -or $_.Contains('#')) { continue }
     $name, $value = $_.split('=')
     $name = $name.Trim()
