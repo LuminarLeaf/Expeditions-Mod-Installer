@@ -33,6 +33,7 @@ if ($args.Length -gt 0) {
         }
         elseif ($arg -eq "-v" -or $arg -eq "--version") {
             Write-Output "ModIO_EXP.ps1 v1.1"
+            Pause
             exit 0
         }
         elseif ($arg -eq "-h" -or $arg -eq "--help") {
@@ -43,10 +44,12 @@ if ($args.Length -gt 0) {
             Write-Output "  -d, --debug       : show debug output"
             Write-Output "  -v, --version     : show version"
             Write-Output "  -h, --help        : show help"
+            Pause
             exit 0
         }
         else {
             Write-Output "ERROR: Unknown argument: $arg"
+            Pause
             exit 1
         }
     }
@@ -65,18 +68,21 @@ Write-Debug "Access token : $($env:ACCESS_TOKEN.Substring(0, 10) + "..." + $env:
 $vars = @($env:ACCESS_TOKEN, $env:USER_PROFILE, $env:MODS_DIR)
 if ($null -in $vars -or $vars -contains "") {
     Write-Output "ERROR: AccessToken or UserProfile or ModsDir not set in .env file"
+    Pause
     exit 1
 }
 
 # check if userprofile dir exists
 if (-not (Test-Path $env:USER_PROFILE)) {
     Write-Output "ERROR: UserProfile does not exist in given path"
+    Pause
     exit 1
 }
 
 # check if mod dir exists
 if (-not (Test-Path $env:MODS_DIR)) {
     Write-Output "ERROR: ModsDir does not exist in given path"
+    Pause
     exit 1
 }
 
@@ -94,11 +100,13 @@ if ($clearCache -eq 1) {
     $confirmation = Read-Host "Are you sure you want delete the directory $($env:CACHE_DIR)? (y/n)"
     if ($confirmation -ne "y" -and $confirmation -ne "Y" -and $confirmation -ne "yes" -and $confirmation -ne "Yes") {
         Write-Output "Aborted"
+        Pause
         exit 0
     }
     if ($DebugPreference -eq "Continue") { Get-ChildItem -Path "$env:CACHE_DIR" | Remove-Item -Recurse -WhatIf }
     else { Get-ChildItem -Path "$env:CACHE_DIR" | Remove-Item -Recurse }
     Write-Output "Done"
+    Pause
     exit 0
 }
 
@@ -112,6 +120,7 @@ $UserProfileJson = $UserProfileJson | ConvertFrom-Json
 # check if userprofile is valid
 if ($null -eq $UserProfileJson.UserProfile) {
     Write-Output "ERROR: UserProfile is not valid"
+    Pause
     exit 1
 }
 
@@ -131,6 +140,7 @@ $data = Invoke-RestMethod -Method Get -Uri "https://api.mod.io/v1/me/subscribed"
 
 if ($data.result -eq "401") {
     Write-Output "ERROR: AccessToken is invalid"
+    Pause
     exit 1
 }
 
@@ -203,6 +213,7 @@ foreach ($mod in $data.data) {
     catch {
         Write-Output "Failed to download mod. Halting script execution."
         Write-Output "Error: $_"
+        Pause
         exit 1
     }
 
@@ -215,6 +226,7 @@ foreach ($mod in $data.data) {
     catch {
         Write-Output "Failed to extract mod $modID ($modName). Halting script execution."
         Write-Output "Error: $_"
+        Pause
         exit 1
     }
 
