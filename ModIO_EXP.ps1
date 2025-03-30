@@ -86,7 +86,6 @@ if ($clearCache -eq 1) {
 }
 
 # load user profile
-# $UserProfileJson = Get-Content $env:USER_PROFILE | ConvertFrom-Json
 $UserProfileJson = Get-Content $env:USER_PROFILE
 # if last character is not a } then remove it until it is
 while ($UserProfileJson[-1] -ne "}") {
